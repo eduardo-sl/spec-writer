@@ -1,10 +1,67 @@
 # spec-writer
 
-> A portable, language-agnostic skill that turns "build feature X" into an implementation spec an AI coding agent can actually execute — grounded in your project, with explicit goals, non-goals, decisions, alternatives considered, testable requirements, and a verifiable definition of done.
+> Turn "build feature X" into a project-grounded implementation spec your AI coding agent can execute — no placeholder identifiers, no missing non-goals, no untestable Definition of Done.
+
+`spec-writer` is a single Markdown file (`SKILL.md`) that any AI coding tool reads as instructions: Claude Code, Cursor, Windsurf, GitHub Copilot, Aider, Codex, Continue. The frontmatter routes it under Anthropic Agent Skills; the body is plain prose any other tool can load.
+
+It composes patterns from GitHub Spec Kit (`[NEEDS CLARIFICATION]` markers, requirements → tasks traceability), AWS Kiro (EARS notation), Michael Nygard's ADRs (decisions with rejected alternatives), Google design-doc culture (explicit non-goals, alternatives considered), Basecamp's Shape Up (fat-marker sketches, no-gos), and RFC 2119 (normative keywords) into a five-phase process the agent must follow before drafting: **investigate** the project, **clarify** open questions, **justify** each decision, **draft** against a conditional template, **self-check** before saving.
 
 ---
 
-## The problem
+## Install
+
+### Via `npx` *(recommended)*
+
+```bash
+# Drop the whole skill folder into ./spec-writer (no git history)
+npx degit eduardo-sl/spec-writer spec-writer
+```
+
+Then move `SKILL.md` into the path your AI tool expects (see the table below). `npx degit` requires no install — it ships with `npx`.
+
+### Single file via `curl`
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/eduardo-sl/spec-writer/main/SKILL.md -o SKILL.md
+```
+
+### Per-tool placement
+
+| Tool | Path |
+|---|---|
+| Claude Code | `.claude/skills/spec-writer/SKILL.md` |
+| Cursor | `.cursor/rules/spec-writer.mdc` |
+| Windsurf | `.windsurf/rules/spec-writer.md` |
+| GitHub Copilot Chat | reference from `.github/copilot-instructions.md` |
+| Aider | `aider --read SKILL.md` |
+| Codex / Continue / other | any path your tool loads instruction Markdown from |
+
+One-liner that downloads straight into the Claude Code skills path:
+
+```bash
+mkdir -p .claude/skills/spec-writer && \
+  curl -fsSL https://raw.githubusercontent.com/eduardo-sl/spec-writer/main/SKILL.md \
+       -o .claude/skills/spec-writer/SKILL.md
+```
+
+---
+
+## Quick start
+
+Once the skill is loaded, drop a prompt in your agent's chat. The simplest form:
+
+```
+Use the spec-writer skill to create a spec for
+adding pagination to the customer list endpoint.
+```
+
+The agent reads your project's primary context document (`AGENTS.md` / `CLAUDE.md` / `.cursorrules` / `README.md`), the dependency manifest, the entry point, and the area being modified. It detects the **feature class** (backend / frontend / library / CLI / data / refactor), then writes `specs/pagination/SPEC.md` with real names from your codebase, requirements with IDs, decisions with rejected alternatives, and a Definition of Done where every checkbox is independently verifiable.
+
+For prompts by feature class, by prompt level, and by workflow (decomposition, plan mode, retrofit, draft revision), see **[EXAMPLES.md](EXAMPLES.md)**.
+
+---
+
+## The problem this solves
 
 You ask an agent to write a spec. It writes one. It just never read the codebase first.
 
@@ -12,168 +69,33 @@ The result is always the same: placeholder identifiers (`SomeService`, `MyReposi
 
 Then come the mid-task questions, the wrong wiring, the ignored edge cases, and a PR that doesn't match the spec.
 
-**spec-writer** fixes this by making the agent follow a five-phase process where reading the project, surfacing open questions, and justifying every decision come *before* the first line of spec text.
+`spec-writer` fixes this by making the agent follow a five-phase process where reading the project, surfacing open questions, and justifying every decision come *before* the first line of spec text.
 
 ---
 
-## What it is
+## How it works
 
-A single `SKILL.md` file. The body is plain Markdown that any AI coding tool can load as instructions — Claude Code, Cursor, Windsurf, GitHub Copilot, Aider, Codex, Continue, and similar systems. The frontmatter is consumed by Claude Code for routing; other tools ignore unknown YAML harmlessly.
+### The five phases
 
-The skill is informed by:
+When the skill is activated, the agent runs these in order. None can be skipped.
 
-- **GitHub Spec Kit** — the constitution / specify / plan / tasks pattern, with `[NEEDS CLARIFICATION]` markers
-- **AWS Kiro** — EARS notation for testable requirements, requirement-to-task traceability
-- **ADRs** (Michael Nygard) — Context / Decision / Consequences with rejected alternatives
-- **Google design doc culture** — explicit non-goals, alternatives considered, cross-cutting concerns
-- **Shape Up** (Basecamp) — fat-marker sketches, scope budgets, no-gos
-- **Anthropic Agent Skills format** — frontmatter, progressive disclosure, "explain the why" over rigid MUST walls
-- **RFC 2119 + Rust RFCs + Python PEPs** — normative keywords, rejected ideas, two-level explanation
-
----
-
-## Compatibility
-
-Any tool that loads instruction Markdown:
-
-| Tool | How it picks it up |
-|---|---|
-| Claude Code | Place at project root or under `.claude/skills/spec-writer/SKILL.md`. The frontmatter routes activation. |
-| Cursor | Drop into `.cursor/rules/spec-writer.mdc` (or `.cursorrules` for the legacy format). |
-| Windsurf | Drop into `.windsurf/rules/`. |
-| GitHub Copilot Chat | Reference in the project's `.github/copilot-instructions.md`. |
-| Aider | `aider --read SKILL.md` |
-| Codex / Continue / others | Any tool that lets you load a project-level prompt. |
-
-**Language-agnostic.** Works for Go, TypeScript, Python, Rust, Java, Kotlin, Swift, C#, Ruby, PHP, Elixir, ML pipelines, infra, mobile, frontend — any stack.
-
----
-
-## Installation
-
-### Manual (recommended for portability)
-
-Copy `SKILL.md` to wherever your agent loads instructions from. Some common targets:
-
-```
-.claude/skills/spec-writer/SKILL.md
-.cursor/rules/spec-writer.mdc
-.windsurf/rules/spec-writer.md
-docs/SKILL.md  # generic location for any tool
-```
-
-### Project root
-
-Drop `SKILL.md` at the repo root. Reference it from your `AGENTS.md` / `CLAUDE.md` / `.cursorrules` so the agent knows it exists and when to use it.
-
----
-
-## How to use
-
-### Activation phrase
-
-Any of these will trigger the skill if loaded:
-
-```
-use the spec-writer skill to create a spec for ...
-write a spec for ...
-spec out ...
-plan the implementation of ...
-```
+1. **Investigate the project.** Read primary context (`AGENTS.md` / `CLAUDE.md` / `.cursorrules` / `README.md` — first match), the dependency manifest, the entry point, the environment contract, and at least three files in the area being modified. Detect the feature class.
+2. **Clarify before drafting.** Identify what's decided, what's assumed, what's unknown. Anything still open is marked inline as `[NEEDS CLARIFICATION: ...]`. The spec is not "ready" while any clarification marker remains.
+3. **Justify the approach.** For every material decision: why this for **this project** (referencing real constraints), and why not the obvious alternative (one sentence, real trade-off). Generic justifications are rejected.
+4. **Draft the spec.** Use the conditional template (below). Include only sections that apply to the feature class; mark omitted optional sections `N/A — <reason>`. Requirements get IDs (`R1`, `R2`, …) as testable EARS-style statements; tasks back-reference requirement IDs.
+5. **Self-check.** Ten questions before saving — read the project, real names, alternatives named, non-goals explicit, criteria testable, DoD verifiable, open questions surfaced, failure modes specified, rollback documented, right-sized.
 
 ### Three prompt levels
 
 The difference between levels is **what you've already decided vs. what's still open** — not length.
 
-#### Level 1 — Minimal
+- **Level 1 — Minimal.** Use when the project has a thorough `AGENTS.md` / `CLAUDE.md`. The skill infers constraints from there.
+- **Level 2 — Standard *(recommended)*.** Use when the main decisions are made. Pass them as `Context:` bullets.
+- **Level 3 — Complete.** Use when there are open decisions or ambiguous scope. Pass `Decided:` and `Still undecided:` blocks; the open ones surface as `[NEEDS CLARIFICATION]` rather than getting silently invented.
 
-Use when the project has a well-documented `AGENTS.md` / `CLAUDE.md`.
+Worked examples for each level live in [EXAMPLES.md](EXAMPLES.md#1-by-prompt-level).
 
-```
-Use the spec-writer skill to create a spec for
-rate limiting on the API.
-```
-
-The agent reads the primary context document and infers constraints.
-
-#### Level 2 — Standard *(recommended)*
-
-Use when the main decisions are made.
-
-```
-Use the spec-writer skill to create a spec for
-rate limiting on the API.
-
-Context:
-- Token bucket, per IP and per authenticated user
-- Redis in production (already in the stack), in-memory fallback
-- Apply only to /api/v1/*, not /health or /metrics
-- 100 req/min unauthenticated, 600 req/min authenticated
-- Client receives 429 with Retry-After header
-
-Output: specs/rate-limiting/SPEC.md
-```
-
-#### Level 3 — Complete
-
-Use when there are open decisions or ambiguous scope.
-
-```
-Use the spec-writer skill to create a spec for
-rate limiting on the API.
-
-Decided:
-- Token bucket, per IP and per user (JWT claims)
-- Redis already available in the stack
-- Only /api/v1/*, not /health /swagger /metrics
-- 429 with Retry-After required
-
-Still undecided — surface trade-offs in the spec:
-- Sliding window vs fixed window within token bucket
-- Global state vs per-route state
-
-What this is NOT:
-- Not DDoS protection / WAF
-- Not granular per-endpoint limits (future)
-
-Output: specs/rate-limiting/SPEC.md
-```
-
-What's open is marked `[NEEDS CLARIFICATION]` in the resulting spec, not silently resolved.
-
----
-
-## The five-phase process
-
-When the skill is activated, the agent follows these phases. None can be skipped.
-
-### Phase 1 — Investigate the project
-
-Read primary context (`AGENTS.md` / `CLAUDE.md` / `.cursorrules` / `README.md` — first match), the dependency manifest, the entry point, the environment contract, and at least three files in the area being modified.
-
-Detect the **feature class**: backend service, frontend / UI, library / SDK, CLI / script, data / pipeline / ML, or refactor. The class determines which sections of the spec template apply.
-
-### Phase 2 — Clarify before drafting
-
-Identify what's decided, what's assumed, what's unknown. Anything still open is marked inline as `[NEEDS CLARIFICATION: ...]`. The spec is not "ready" while any clarification marker remains.
-
-### Phase 3 — Justify the approach
-
-For every material decision: why this for **this project** (referencing real constraints), and why not the obvious alternative (one sentence, real trade-off). Generic justifications are rejected.
-
-### Phase 4 — Draft the spec
-
-Use the template (below). Include only sections that apply to the feature class; mark omitted optional sections `N/A — <reason>`.
-
-Requirements get IDs (`R1`, `R2`, …) and are written as testable statements — EARS patterns where useful. Tasks back-reference requirement IDs, so traceability is one grep away.
-
-### Phase 5 — Self-check
-
-Ten questions before saving — read the project, real names, alternatives named, non-goals explicit, criteria testable, DoD verifiable, open questions surfaced, failure modes specified, rollback documented, right-sized.
-
----
-
-## Spec template — what gets generated
+### Spec template — what gets generated
 
 23 sections, **conditional by feature class**. Required sections always appear; conditional sections appear only when relevant — otherwise a one-line `N/A — <reason>` is left so reviewers know it was considered.
 
@@ -205,9 +127,7 @@ Ten questions before saving — read the project, real names, alternatives named
 
 Sections **5, 10, and 23** are where specs typically fail. They are the most controlled by the skill.
 
----
-
-## Output
+### Output
 
 Default location: `specs/<feature-name>/SPEC.md` — lowercase, hyphenated, one spec per directory. The skill creates `specs/` if absent.
 
@@ -283,7 +203,7 @@ In Claude Code: `Shift+Tab` before submitting (or `/plan`). The agent surfaces a
 
 ## Orchestrating large work — the spec graph
 
-A large feature usually wants a **graph of focused specs** rather than one monolith. The decomposition rule: two specs can be drafted in parallel if and only if their **File structure** sections do not share modified files.
+A large feature usually wants a **graph of focused specs** rather than one monolith. Decomposition rule: two specs can be drafted in parallel if and only if their **File structure** sections do not share modified files.
 
 Before drafting any spec for broad work:
 
@@ -330,7 +250,7 @@ A good context doc has:
 - **Key patterns** — where each pattern lives in the code.
 - **Configuration reference** — environment variables with defaults.
 
-Without it, the agent infers from code — which works, but is slower and less precise.
+Without it, the agent infers from code — which works, but is slower and less precise. EXAMPLES.md includes a prompt for generating an `AGENTS.md` first when one is missing.
 
 ---
 
@@ -365,8 +285,6 @@ spec-writer/
 
 Intentionally simple. One skill, one file, zero dependencies.
 
-For copy-paste prompts covering all feature classes, prompt levels, and workflows (decomposition, plan mode, retrofit, draft revision), see [EXAMPLES.md](EXAMPLES.md).
-
 ---
 
 ## Contributing
@@ -381,4 +299,4 @@ Issues and PRs welcome, especially for:
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
