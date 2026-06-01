@@ -10,14 +10,13 @@ It composes patterns from GitHub Spec Kit (`[NEEDS CLARIFICATION]` markers, requ
 
 ## Install
 
-### Via `npx` *(recommended)*
+### Via `npx skills` *(recommended)*
 
 ```bash
-# Drop the whole skill folder into ./spec-writer (no git history)
-npx degit eduardo-sl/spec-writer spec-writer
+npx skills add eduardo-sl/spec-writer
 ```
 
-Then move `SKILL.md` into the path your AI tool expects (see the table below). `npx degit` requires no install — it ships with `npx`.
+This downloads `SKILL.md` and places it in the correct path for your AI tool automatically.
 
 ### Single file via `curl`
 
@@ -28,7 +27,7 @@ curl -fsSL https://raw.githubusercontent.com/eduardo-sl/spec-writer/main/SKILL.m
 ### Per-tool placement
 
 | Tool | Path |
-|---|---|
+| --- | --- |
 | Claude Code | `.claude/skills/spec-writer/SKILL.md` |
 | Cursor | `.cursor/rules/spec-writer.mdc` |
 | Windsurf | `.windsurf/rules/spec-writer.md` |
@@ -82,7 +81,7 @@ When the skill is activated, the agent runs these in order. None can be skipped.
 1. **Investigate the project.** Read primary context (`AGENTS.md` / `CLAUDE.md` / `.cursorrules` / `README.md` — first match), the dependency manifest, the entry point, the environment contract, and at least three files in the area being modified. Detect the feature class.
 2. **Clarify before drafting.** Identify what's decided, what's assumed, what's unknown. Anything still open is marked inline as `[NEEDS CLARIFICATION: ...]`. The spec is not "ready" while any clarification marker remains.
 3. **Justify the approach.** For every material decision: why this for **this project** (referencing real constraints), and why not the obvious alternative (one sentence, real trade-off). Generic justifications are rejected.
-4. **Draft the spec.** Use the conditional template (below). Include only sections that apply to the feature class; mark omitted optional sections `N/A — <reason>`. Requirements get IDs (`R1`, `R2`, …) as testable EARS-style statements; tasks back-reference requirement IDs.
+4. **Draft the spec.** Use the conditional template. Include only sections that apply to the feature class; mark omitted optional sections `N/A — <reason>`. Requirements get IDs (`R1`, `R2`, …) as testable EARS-style statements; tasks back-reference requirement IDs.
 5. **Self-check.** Ten questions before saving — read the project, real names, alternatives named, non-goals explicit, criteria testable, DoD verifiable, open questions surfaced, failure modes specified, rollback documented, right-sized.
 
 ### Three prompt levels
@@ -100,7 +99,7 @@ Worked examples for each level live in [EXAMPLES.md](EXAMPLES.md#1-by-prompt-lev
 23 sections, **conditional by feature class**. Required sections always appear; conditional sections appear only when relevant — otherwise a one-line `N/A — <reason>` is left so reviewers know it was considered.
 
 | # | Section | Status |
-|---|---|---|
+| --- | --- | --- |
 | 1 | Summary | required |
 | 2 | Goals and Non-goals | required |
 | 3 | Open questions | required while non-empty |
@@ -169,17 +168,14 @@ Accepted:
 ### Decisions section
 
 Rejected:
-
 > We will use Redis because it's the most popular caching layer.
 
 Accepted:
-
-> **D2 — Storage backend for the limiter.**
-> **Chosen:** Redis with INCR + PEXPIRE.
-> **Why this for this project:** Redis is already in the stack for session storage (`platform/cache/`) and the rate-limit data has the same lifecycle properties. Reuses the existing connection pool defined at `platform/cache/pool.go`.
-> **Alternatives considered:**
+> **D2 — Storage backend for the limiter.** **Chosen:** Redis with INCR + PEXPIRE. **Why this for this project:** Redis is already in the stack for session storage (`platform/cache/`) and the rate-limit data has the same lifecycle properties. Reuses the existing connection pool defined at `platform/cache/pool.go`. **Alternatives considered:**
+>
 > - In-memory only — rejected: doesn't survive process restart and doesn't share state across replicas, both of which break the per-user limit.
 > - PostgreSQL row-level — rejected: row contention under spike traffic is the exact failure mode rate limiting is meant to absorb.
+>
 > **Consequences:** Adds a hard dependency on Redis for one more code path. Mitigated by an in-memory fallback (R5) when `REDIS_URL` is empty.
 
 ---
@@ -189,7 +185,7 @@ Accepted:
 The skill works in both modes.
 
 | Situation | Plan first | Direct |
-|---|---|---|
+| --- | --- | --- |
 | New feature, ambiguous scope | ✅ | ⚠️ may need rewrite |
 | New integration (Redis, Kafka, gRPC) | ✅ | ✅ with Level 2+ prompt |
 | Well-documented project (`AGENTS.md`) | optional | ✅ preferred |
@@ -259,7 +255,7 @@ Without it, the agent infers from code — which works, but is slower and less p
 If any of these appear in the generated spec, it is rewritten before delivery:
 
 | Anti-pattern | Why it's a problem |
-|---|---|
+| --- | --- |
 | `"We will use X"` | Collaborative, not imperative — write `"Use X"`. |
 | `"Can be extended later"` without trigger | No concrete trigger = immediate tech debt. |
 | Interface defined in the infra layer | Violates dependency inversion — infra doesn't define contracts. |
