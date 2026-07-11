@@ -155,6 +155,7 @@ Verify each item. Anything that fails must be addressed before delivering.
 8. For any external dependency: is the failure-mode behavior specified (degrade, retry, fail-fast)?
 9. For any feature flag or staged rollout: is the rollback path and the flag-removal trigger documented?
 10. Is the spec the right size for the tier chosen in phase 1? A 50-page monolith should be split into a graph; a 5-line stub usually skipped phases 1–3.
+11. Trace every requirement ID: does each R appear in at least one task, one test scenario, and one Definition-of-Done item? An orphaned requirement is either dead scope or a missing task — fix it before delivering.
 
 ## Spec template
 
@@ -329,6 +330,8 @@ Numbered, dependency-ordered. Mark groups that can run in parallel. Each task ba
 - T1 [parallel-A] [R1] — ...
 - T2 [parallel-A] [R2] — ...
 - T3 [after T1, T2] [R3] — ...
+
+Coverage: every requirement ID appears in at least one task. List any unmapped R-IDs here with ⚠️ and resolve them before the spec is `ready`.
 
 ## 24. Definition of Done (required)
 A checklist where every item is independently verifiable — a command passes, a file exists, an observable behavior is met. Group by layer (contracts, implementation, integration, tests, observability) when useful.
