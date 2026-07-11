@@ -98,6 +98,11 @@ Not every unknown blocks the spec. Split what remains unresolved at draft time:
 
 A spec is not "ready" while any `[NEEDS CLARIFICATION]` remains. Unconfirmed assumptions do not block readiness — they are visible, signed defaults the user can veto. The invariant: **nothing is left silently unresolved.** Every unknown ends up resolved with the user, marked `[NEEDS CLARIFICATION]`, or logged as an assumption.
 
+Two more rules while clarifying:
+
+- **Scope guardrail.** Clarification refines *how* within the stated boundary; it never adds capabilities. When the user — or your own investigation — surfaces a new capability ("should we also…"), record it under "Deferred ideas" in section 2 and return to the current scope. Captured, not built.
+- **Delegated decisions.** When batching questions, present concrete options with a recommendation, and accept "you decide" as an answer. A delegated decision goes into the Assumptions table with your chosen default and `Confirmed? yes (delegated)`.
+
 ### Phase 3 — Justify the approach
 
 For each material decision (technology, pattern, integration boundary, abstraction shape), answer two questions before documenting the implementation:
@@ -171,6 +176,10 @@ Two to four sentences. What this adds, who benefits, what it explicitly is **not
 - N2 — ...
 
 Non-goals do more work than goals — they bound the scope. Be specific.
+
+### Deferred ideas (optional)
+Capabilities that surfaced during clarification but belong to another spec. Captured so they are not lost; explicitly not built here.
+- ...
 
 ## 3. Open questions and assumptions (required while non-empty)
 
