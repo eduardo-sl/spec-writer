@@ -86,13 +86,17 @@ Sweep depth follows the tier from phase 1. **Large/Complex:** every dimension re
 
 The `N/A — <reason>` escape is mandatory where it applies — it prevents inventing requirements to fill a checklist. The sweep is bounded by the feature's boundary: it clarifies scope, it never expands it.
 
-For anything still unresolved at draft time, mark it inline:
+Not every unknown blocks the spec. Split what remains unresolved at draft time:
 
-```
-[NEEDS CLARIFICATION: token-bucket per-IP, per-user, or both?]
-```
+- **Blocking** — it meets any of the cues above. Mark it inline and collect it under "Open questions" so it cannot be missed:
 
-A spec is not "ready" while any `[NEEDS CLARIFICATION]` remains. Collect them under "Open questions" at the top so they cannot be missed.
+  ```
+  [NEEDS CLARIFICATION: token-bucket per-IP, per-user, or both?]
+  ```
+
+- **Assumable** — a reasonable default exists and being wrong is cheap to correct. Choose the default, log it in the Assumptions table (section 3) with the rationale and `Confirmed? no`, and proceed.
+
+A spec is not "ready" while any `[NEEDS CLARIFICATION]` remains. Unconfirmed assumptions do not block readiness — they are visible, signed defaults the user can veto. The invariant: **nothing is left silently unresolved.** Every unknown ends up resolved with the user, marked `[NEEDS CLARIFICATION]`, or logged as an assumption.
 
 ### Phase 3 — Justify the approach
 
@@ -135,7 +139,7 @@ Verify each item. Anything that fails must be addressed before delivering.
 4. Are non-goals explicit — not just implied by the goal?
 5. Are acceptance criteria testable? Could a different person verify each one without asking me?
 6. Does each Definition-of-Done item have an objective verification — a command, a file existence check, an observable behavior — not a feeling?
-7. Are open questions surfaced under "Open questions" rather than silently resolved?
+7. Is every unknown accounted for — blocking ones under "Open questions", assumable ones in the Assumptions table with a chosen default and rationale — rather than silently resolved?
 8. For any external dependency: is the failure-mode behavior specified (degrade, retry, fail-fast)?
 9. For any feature flag or staged rollout: is the rollback path and the flag-removal trigger documented?
 10. Is the spec the right size for the tier chosen in phase 1? A 50-page monolith should be split into a graph; a 5-line stub usually skipped phases 1–3.
@@ -168,8 +172,19 @@ Two to four sentences. What this adds, who benefits, what it explicitly is **not
 
 Non-goals do more work than goals — they bound the scope. Be specific.
 
-## 3. Open questions (required while non-empty; remove the section once empty)
+## 3. Open questions and assumptions (required while non-empty)
+
+### Open questions (blocking — spec is not ready while any remains)
 - [NEEDS CLARIFICATION: ...]
+
+Remove this subsection once empty.
+
+### Assumptions (non-blocking — chosen defaults, visible and vetoable)
+| Assumption | Chosen default | Rationale | Confirmed? |
+|---|---|---|---|
+| <ambiguity> | <what the spec proceeds with> | <why this default> | no |
+
+Flip `Confirmed?` to `yes` when the user signs off. Keep confirmed rows — they are the decision record for choices too small for section 5.
 
 ## 4. Requirements (required)
 Numbered, testable. EARS patterns where useful.
