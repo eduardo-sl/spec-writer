@@ -67,7 +67,7 @@ Output: specs/webhook-delivery/SPEC.md
 
 ### Level 3 — Complete
 
-Use when there are real open decisions or the scope is ambiguous. The agent will mark unresolved points `[NEEDS CLARIFICATION]` rather than silently invent answers.
+Use when there are real open decisions or the scope is ambiguous. The agent will mark blocking unresolved points `[NEEDS CLARIFICATION]` — and log the non-blocking ones as assumptions with a chosen default you can veto — rather than silently invent answers.
 
 ```
 Use the spec-writer skill to create a spec for
@@ -364,9 +364,25 @@ Resolving the open questions in specs/multitenant-isolation/SPEC.md:
   → Tenant ID is serialized into the job payload. Workers SET search_path
     on dequeue.
 
-Update §3 (Open questions), §5 (Decisions), §6 (Design), and §10 (Implementation
-outline) accordingly. Remove the [NEEDS CLARIFICATION] markers. Re-run the
-self-check.
+Update §3 (Open questions and assumptions), §5 (Decisions), §6 (Design), and
+§11 (Implementation outline) accordingly. Remove the [NEEDS CLARIFICATION]
+markers. Re-run the self-check.
+```
+
+### Confirming (or vetoing) assumptions
+
+Non-blocking unknowns proceed with a chosen default in the Assumptions table (§3). Review them in one pass:
+
+```
+Review the Assumptions table in specs/webhook-delivery/SPEC.md:
+
+- "Retry schedule is fixed, not per-tenant" → confirmed.
+- "Dead-lettered deliveries are retained for 30 days" → veto: make it 90 days,
+  compliance requires it.
+- "Signature key rotation is out of scope" → confirmed.
+
+Flip Confirmed? to yes on the confirmed rows, apply the veto (update §4 and any
+affected sections), and re-run the self-check.
 ```
 
 ### Adapting a spec when constraints change
@@ -376,7 +392,7 @@ specs/webhook-delivery/SPEC.md is accepted, but the SLA changed:
 the team wants 99.9% delivery within 60 seconds for the first attempt,
 not the 10 seconds in the current spec.
 
-Update §4 (Requirements), §19 (Performance), and §20 (Testing) to reflect
+Update §4 (Requirements), §20 (Performance), and §21 (Testing) to reflect
 the new target. Note the change in the document header (Last updated, Related)
 and in §2 (Goals) if the appetite for the work changes.
 
@@ -441,7 +457,7 @@ This isn't a spec request — it's an implementation order written as a paragrap
 Use the spec-writer skill to fix the typo in the login button label.
 ```
 
-The skill is for implementation specs. For one-line fixes, refactors that touch a couple of files, or config tweaks, just ask for the change directly.
+The skill is for implementation specs. Small features are fine — the small tier produces a compact spec instead of the full template — but one-line fixes, typo corrections, and config tweaks don't need a spec at all. Just ask for the change directly.
 
 ---
 
@@ -454,8 +470,9 @@ The skill is for implementation specs. For one-line fixes, refactors that touch 
 | New feature, real open decisions | 3 | recommended |
 | Unfamiliar codebase, agent has no context | 2 + ask for AGENTS.md first | recommended |
 | Broad initiative spanning multiple components | decomposition prompt first | recommended |
+| Small feature (≤3 files, clear scope) | 1 or 2 — the small tier keeps the spec compact | not needed |
 | Refining an existing draft | revision prompt, point at file | not needed |
-| Resolving open questions | targeted update prompt | not needed |
+| Resolving open questions / confirming assumptions | targeted update prompt | not needed |
 | Tactical fix / one-line change | don't use the skill | — |
 
 | Output convention | Default |

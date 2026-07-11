@@ -4,7 +4,7 @@
 
 `spec-writer` is a single Markdown file (`SKILL.md`) that any AI coding tool reads as instructions: Claude Code, Cursor, Windsurf, GitHub Copilot, Aider, Codex, Continue. The frontmatter routes it under Anthropic Agent Skills; the body is plain prose any other tool can load.
 
-It composes patterns from GitHub Spec Kit (`[NEEDS CLARIFICATION]` markers, requirements → tasks traceability), AWS Kiro (EARS notation), Michael Nygard's ADRs (decisions with rejected alternatives), Google design-doc culture (explicit non-goals, alternatives considered), Basecamp's Shape Up (fat-marker sketches, no-gos), and RFC 2119 (normative keywords) into a five-phase process the agent must follow before drafting: **investigate** the project, **clarify** open questions, **justify** each decision, **draft** against a conditional template, **self-check** before saving.
+It composes patterns from GitHub Spec Kit (`[NEEDS CLARIFICATION]` markers, requirements → tasks traceability), AWS Kiro (EARS notation), Michael Nygard's ADRs (decisions with rejected alternatives), Google design-doc culture (explicit non-goals, alternatives considered), Basecamp's Shape Up (fat-marker sketches, no-gos), RFC 2119 (normative keywords), and Tech Leads Club's [tlc-spec-driven](https://github.com/tech-leads-club/agent-skills/tree/main/packages/skills-catalog/skills/(development)/tlc-spec-driven) (complexity auto-sizing, implicit-requirements sweep, assumption logging) into a five-phase process the agent must follow before drafting: **investigate** the project, **clarify** open questions, **justify** each decision, **draft** against a conditional template, **self-check** before saving.
 
 ---
 
@@ -78,11 +78,11 @@ Then come the mid-task questions, the wrong wiring, the ignored edge cases, and 
 
 When the skill is activated, the agent runs these in order. None can be skipped.
 
-1. **Investigate the project.** Read primary context (`AGENTS.md` / `CLAUDE.md` / `.cursorrules` / `README.md` — first match), the dependency manifest, the entry point, the environment contract, and at least three files in the area being modified. Detect the feature class.
-2. **Clarify before drafting.** Identify what's decided, what's assumed, what's unknown. Anything still open is marked inline as `[NEEDS CLARIFICATION: ...]`. The spec is not "ready" while any clarification marker remains.
-3. **Justify the approach.** For every material decision: why this for **this project** (referencing real constraints), and why not the obvious alternative (one sentence, real trade-off). Generic justifications are rejected.
-4. **Draft the spec.** Use the conditional template. Include only sections that apply to the feature class; mark omitted optional sections `N/A — <reason>`. Requirements get IDs (`R1`, `R2`, …) as testable EARS-style statements; tasks back-reference requirement IDs.
-5. **Self-check.** Ten questions before saving — read the project, real names, alternatives named, non-goals explicit, criteria testable, DoD verifiable, open questions surfaced, failure modes specified, rollback documented, right-sized.
+1. **Investigate the project.** First, size the work — four tiers (small / medium / large / complex) decide how deep the spec goes, so a 3-file change gets a compact spec and a cross-cutting feature gets the full template. Then read primary context (`AGENTS.md` / `CLAUDE.md` / `.cursorrules` / `README.md` — first match), the dependency manifest, the entry point, the environment contract, how the project runs its checks (commands are discovered from manifests and CI, never invented), and at least three files in the area being modified. Detect the feature class, and flag concerns found in the code the feature touches.
+2. **Clarify before drafting.** Identify what's decided, what's assumed, what's unknown, then run an implicit-requirements sweep over nine easy-to-miss dimensions (partial failure, idempotency, concurrency, data lifecycle, …) — each resolves to a requirement or an explicit `N/A — <reason>`. Blocking unknowns are marked `[NEEDS CLARIFICATION: ...]` and gate readiness; assumable ones proceed with a chosen default logged in the Assumptions table. Scope-creep ideas land in "Deferred ideas" instead of widening the spec.
+3. **Justify the approach.** For every material decision: why this for **this project** (referencing real constraints), and why not the obvious alternative (one sentence, real trade-off). Generic justifications are rejected. External APIs and flags must be verified against a call site or official docs — never recalled from memory.
+4. **Draft the spec.** Use the conditional template. Include only sections that apply to the feature class and tier; mark omitted optional sections `N/A — <reason>`. Requirements get IDs (`R1`, `R2`, …) with P1/P2/P3 priorities as testable EARS-style statements; tasks back-reference requirement IDs and complete the P1 slice first.
+5. **Self-check.** Eleven questions before saving — read the project, real names, alternatives named, non-goals explicit, criteria testable, DoD verifiable, unknowns accounted for, failure modes specified, rollback documented, right-sized for the tier, and every R-ID traced to a task, a test scenario, and a DoD item.
 
 ### Three prompt levels
 
@@ -96,35 +96,36 @@ Worked examples for each level live in [EXAMPLES.md](EXAMPLES.md#1-by-prompt-lev
 
 ### Spec template — what gets generated
 
-23 sections, **conditional by feature class**. Required sections always appear; conditional sections appear only when relevant — otherwise a one-line `N/A — <reason>` is left so reviewers know it was considered.
+24 sections, **conditional by feature class and tier**. Required sections always appear; conditional sections appear only when relevant — otherwise a one-line `N/A — <reason>` is left so reviewers know it was considered. Small-tier specs use a compact subset (Summary, Goals/Non-goals, Open questions, Requirements, Tasks, Definition of Done) with no `N/A` ceremony.
 
 | # | Section | Status |
 | --- | --- | --- |
 | 1 | Summary | required |
-| 2 | Goals and Non-goals | required |
-| 3 | Open questions | required while non-empty |
-| 4 | Requirements (EARS-style, with IDs) | required |
+| 2 | Goals and Non-goals (+ Deferred ideas) | required |
+| 3 | Open questions and assumptions | required while non-empty |
+| 4 | Requirements (EARS-style, with IDs and P1/P2/P3) | required |
 | 5 | Decisions and Alternatives Considered | required |
 | 6 | Design | required |
-| 7 | Dependencies | conditional |
-| 8 | Configuration | conditional |
-| 9 | File structure | required |
-| 10 | Implementation outline | required |
-| 11 | Failure modes and degradation | conditional (any external dep) |
-| 12 | Wiring / Bootstrap | conditional (backend / service) |
-| 13 | Infrastructure | conditional (new manifests) |
-| 14 | UX / Accessibility | conditional (UI) |
-| 15 | Public API / SDK impact | conditional (libraries) |
-| 16 | Data and migrations | conditional (schema / data) |
-| 17 | Security and privacy | conditional (auth / PII / external input) |
-| 18 | Observability | conditional (production code) |
-| 19 | Performance | conditional (latency / throughput / cost matters) |
-| 20 | Testing | required |
-| 21 | Rollout and rollback | conditional (staged / risky) |
-| 22 | Tasks (with R-ID back-references) | required |
-| 23 | Definition of Done | required |
+| 7 | Risks and concerns | conditional (investigation found any) |
+| 8 | Dependencies | conditional |
+| 9 | Configuration | conditional |
+| 10 | File structure | required |
+| 11 | Implementation outline | required |
+| 12 | Failure modes and degradation | conditional (any external dep) |
+| 13 | Wiring / Bootstrap | conditional (backend / service) |
+| 14 | Infrastructure | conditional (new manifests) |
+| 15 | UX / Accessibility | conditional (UI) |
+| 16 | Public API / SDK impact | conditional (libraries) |
+| 17 | Data and migrations | conditional (schema / data) |
+| 18 | Security and privacy | conditional (auth / PII / external input) |
+| 19 | Observability | conditional (production code) |
+| 20 | Performance | conditional (latency / throughput / cost matters) |
+| 21 | Testing | required |
+| 22 | Rollout and rollback | conditional (staged / risky) |
+| 23 | Tasks (with R-ID back-references and coverage line) | required |
+| 24 | Definition of Done | required |
 
-Sections **5, 10, and 23** are where specs typically fail. They are the most controlled by the skill.
+Sections **5, 11, and 24** are where specs typically fail. They are the most controlled by the skill.
 
 ### Output
 
@@ -161,7 +162,7 @@ Accepted:
 - [ ] FEATURE_RATE_LIMITING_ENABLED=false → zero infra initialized, no metrics emitted
 
 **Tests**
-- [ ] All scenarios from §20 pass under race detection / concurrent execution
+- [ ] All scenarios from §21 pass under race detection / concurrent execution
 - [ ] Integration test verifies degradation when Redis is unavailable
 ```
 
@@ -229,7 +230,7 @@ A single spec covering subscriptions, payments, invoicing, quota enforcement, an
 
 - **Does not replace the developer's judgment.** Wrong constraints in → wrong spec out, just better formatted.
 - **Is not a code-generation framework.** It instructs the agent on the *process* of speccing. Implementation is still the agent's, guided by the spec.
-- **Is not suitable for tactical tasks.** Bug fixes, local refactors, config tweaks — the overhead is disproportionate.
+- **Is not suitable for trivial tasks.** Since 2.1.0 the small tier keeps overhead proportional for small features, but one-line fixes, typo corrections, and config tweaks still don't need a spec — just ask for the change.
 - **Does not work without project context.** The better the `AGENTS.md` / `CLAUDE.md`, the better the spec. The skill amplifies what already exists; it doesn't invent.
 
 ---
@@ -276,6 +277,7 @@ spec-writer/
 ├── SKILL.md      ← The skill — install this
 ├── EXAMPLES.md   ← Copy-paste prompts for common scenarios
 ├── README.md     ← This file
+├── CHANGELOG.md  ← Version history
 └── LICENSE
 ```
 
