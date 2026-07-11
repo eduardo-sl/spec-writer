@@ -125,7 +125,7 @@ The same grounding applies to external facts. When a decision or code example de
 
 ### Phase 4 — Draft the spec
 
-Use the template below. Include only sections that apply to the feature class. For each omitted optional section, leave a one-line `N/A — <reason>` so reviewers know it was considered.
+Use the template below. Include only sections that apply to the feature class and the tier from phase 1. For each omitted optional section, leave a one-line `N/A — <reason>` so reviewers know it was considered — except in small-tier specs, which drop omitted sections without ceremony.
 
 Write requirements as testable statements. EARS patterns are useful for that:
 
@@ -159,7 +159,7 @@ Verify each item. Anything that fails must be addressed before delivering.
 
 ## Spec template
 
-Sections marked **required** must appear. Sections marked **conditional** appear only when the feature class needs them; otherwise leave a one-line `N/A — <reason>`.
+Sections marked **required** must appear. Sections marked **conditional** appear only when the feature class needs them; otherwise leave a one-line `N/A — <reason>`. Small-tier specs use only the compact subset from the phase-1 sizing table and skip the `N/A` lines.
 
 ```markdown
 # <Feature Name> — Spec
