@@ -134,7 +134,9 @@ Write requirements as testable statements. EARS patterns are useful for that:
 
 Use RFC 2119 keywords (MUST / SHOULD / MAY) only when distinguishing a hard requirement from a preference matters. Don't pepper the spec with all-caps directives — overuse drains their meaning.
 
-Each requirement gets an ID (`R1`, `R2`, …). Each task in the implementation plan back-references the requirement(s) it satisfies, so traceability is one grep away.
+Each requirement gets an ID (`R1`, `R2`, …) and a priority: **P1** (MVP — the feature is not shippable without it), **P2** (should have), **P3** (nice to have). The P1 set must form a coherent, independently demonstrable slice — if P1 alone cannot be demoed, the split is wrong. Priorities give the implementer a task order and a natural cut line when the appetite shrinks.
+
+Each task in the implementation plan back-references the requirement(s) it satisfies, so traceability is one grep away.
 
 ### Phase 5 — Self-check before saving
 
@@ -198,10 +200,12 @@ Remove this subsection once empty.
 Flip `Confirmed?` to `yes` when the user signs off. Keep confirmed rows — they are the decision record for choices too small for section 5.
 
 ## 4. Requirements (required)
-Numbered, testable. EARS patterns where useful.
-- R1 — When <trigger>, the system shall <response>.
-- R2 — The system shall <ubiquitous requirement>.
-- R3 — If <unwanted condition>, then the system shall <response>.
+Numbered, testable, prioritized. EARS patterns where useful.
+- R1 (P1) — When <trigger>, the system shall <response>.
+- R2 (P1) — The system shall <ubiquitous requirement>.
+- R3 (P2) — If <unwanted condition>, then the system shall <response>.
+
+P1 = MVP, P2 = should have, P3 = nice to have. End the section with the sweep outcome: dimensions from the phase-2 sweep that produced no requirement, each as `N/A — <reason>`.
 
 ## 5. Decisions and Alternatives Considered (required)
 For each material decision:
@@ -308,7 +312,7 @@ State unit / integration / contract test placement, what is mocked, what runs ag
 - Removal trigger for the flag and its target date.
 
 ## 22. Tasks (required)
-Numbered, dependency-ordered. Mark groups that can run in parallel. Each task back-references one or more requirement IDs.
+Numbered, dependency-ordered. Mark groups that can run in parallel. Each task back-references one or more requirement IDs. Order tasks so the P1 requirements complete first — the P1 slice should be demonstrable before P2/P3 work starts.
 
 - T1 [parallel-A] [R1] — ...
 - T2 [parallel-A] [R2] — ...
