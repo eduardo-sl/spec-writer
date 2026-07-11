@@ -25,6 +25,17 @@ Five phases. Phases 1–3 are where most specs are won or lost; phase 5 catches 
 
 ### Phase 1 — Investigate the project
 
+First, **size the work**. The scope tier determines spec depth — a fixed-depth pipeline over-engineers small work and under-specifies large work:
+
+| Tier | Typical scope | Spec depth |
+|---|---|---|
+| **Small** | ≤3 files, one obvious change | Compact spec: Summary, Goals/Non-goals, Open questions, Requirements, Tasks, Definition of Done. Omitted sections need no `N/A` line. Skip the phase-2 sweep. |
+| **Medium** | One component area, clear feature | All required sections plus only the conditional sections that clearly apply. Sweep only the dimensions obviously present. |
+| **Large** | Multi-component feature | Full template with conditional sections and full dimensions sweep. |
+| **Complex** | Ambiguous scope, new domain, cross-cutting concerns | Full template, full sweep, and a decomposition plan (see "Working with multiple specs") considered before drafting. |
+
+Record the tier in the spec header. Re-evaluate after investigating: if the code reveals more moving parts than the request implied, size **up** — never size down to save effort.
+
 The single most common failure mode is generating a generic spec because the codebase was never opened. Read first:
 
 - The project's primary agent context (in priority order — first match wins): `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.cursor/rules/`, `CONVENTIONS.md`, `README.md`. If one exists, it is the source of truth — read it in full.
@@ -109,7 +120,7 @@ Verify each item. Anything that fails must be addressed before delivering.
 7. Are open questions surfaced under "Open questions" rather than silently resolved?
 8. For any external dependency: is the failure-mode behavior specified (degrade, retry, fail-fast)?
 9. For any feature flag or staged rollout: is the rollback path and the flag-removal trigger documented?
-10. Is the spec the right size? A 50-page monolith should be split into a graph; a 5-line stub usually skipped phases 1–3.
+10. Is the spec the right size for the tier chosen in phase 1? A 50-page monolith should be split into a graph; a 5-line stub usually skipped phases 1–3.
 
 ## Spec template
 
@@ -119,6 +130,7 @@ Sections marked **required** must appear. Sections marked **conditional** appear
 # <Feature Name> — Spec
 
 **Status:** draft | ready | in progress | done
+**Tier:** small | medium | large | complex
 **Owner:** <single name>
 **Last updated:** <ISO date>
 **Related:** <ADRs, issues, prior specs, PRs>
