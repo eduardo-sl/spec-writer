@@ -43,6 +43,7 @@ The single most common failure mode is generating a generic spec because the cod
 - The dependency manifest for whichever ecosystem applies (`go.mod`, `package.json`, `Cargo.toml`, `pyproject.toml`, `requirements.txt`, `pom.xml`, `build.gradle`, `Gemfile`, `*.csproj`, `pubspec.yaml`, etc.).
 - The entry point(s) — wiring / bootstrap / main / app composition root.
 - Any environment or configuration contract (`.env.example`, `config.*`, settings schema).
+- How the project runs its checks — test/lint/build commands from the project's own manifests and CI (`package.json` scripts, `Makefile`, `pyproject.toml`, `.github/workflows/`, etc.), and where existing tests live. Commands quoted in the spec must be discovered here, never invented from ecosystem habit.
 - Infrastructure manifests if the work touches them (`docker-compose.*`, `k8s/`, `terraform/`).
 - The directory containing the area being modified — at least three representative files so the spec can match local conventions.
 
@@ -303,7 +304,7 @@ A scenario table with at least five rows. Cover: happy path, dependency unavaila
 |---|---|---|---|
 | Happy path | ... | ... | R1 |
 
-State unit / integration / contract test placement, what is mocked, what runs against real infrastructure, and the command to run them. State any coverage target the project has.
+State unit / integration / contract test placement, what is mocked, what runs against real infrastructure, and the command to run them. Every command must come from the project's own manifests or CI config — name the source (e.g. "`make test`, from `Makefile`"). If the project has no test setup, say so and mark `[NEEDS CLARIFICATION: test runner and command?]` instead of inventing one. State any coverage target the project has.
 
 ## 21. Rollout and rollback (conditional — staged or risky changes)
 - Flag name and default.
