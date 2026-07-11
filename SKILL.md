@@ -118,6 +118,8 @@ Generic, rejected:
 Project-grounded, accepted:
 > Cache-aside puts invalidation in the application — grep-able and consistent with the explicit-over-magic rule already established in `AGENTS.md`. Write-through would coordinate cache writes with the existing transactional outbox in `Service.Register()`, putting two responsibilities in one transaction.
 
+The same grounding applies to external facts. When a decision or code example depends on a library API, configuration flag, or protocol behavior, verify it in this order: an existing call site in the codebase → the project's own docs → the dependency's official documentation. If none confirms it, do not present it as fact — mark it `[NEEDS CLARIFICATION: verify <X> against <source>]`. A fabricated API in a spec propagates into implementation and fails late; a flagged uncertainty fails now, cheaply.
+
 ### Phase 4 — Draft the spec
 
 Use the template below. Include only sections that apply to the feature class. For each omitted optional section, leave a one-line `N/A — <reason>` so reviewers know it was considered.
@@ -343,6 +345,7 @@ These produce specs that read well but don't ship:
 - Definition-of-Done items that cannot be objectively verified.
 - Placeholder identifiers (`SomeService`, `MyRepository`, generic `Handler`).
 - Strawman alternatives — listed only to be dismissed; not real options anyone would have considered.
+- Library APIs, flags, or protocol behaviors recalled from memory instead of verified against the codebase or official docs.
 
 ## Working with multiple specs
 
