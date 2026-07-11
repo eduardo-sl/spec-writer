@@ -68,6 +68,24 @@ Identify what is **decided**, what is **assumed**, and what is **unknown**. Ask 
 - The user's constraints contradict something you found in the codebase.
 - A non-goal is unclear (often the actual scope question).
 
+Before closing this phase, run an **implicit-requirements sweep**. These dimensions hide the requirements nobody writes down until production finds them:
+
+| Dimension | What to cover |
+|---|---|
+| Input validation & bounds | limits, formats, sanitization |
+| Failure / partial failure | timeouts, partial writes, rollback |
+| Idempotency / retries / duplicates | safe retries, dedup keys |
+| Auth boundaries & rate limits | who can call what; throttle rules |
+| Concurrency / ordering | races, ordering guarantees |
+| Data lifecycle | TTL, archival, deletion |
+| Observability | logs, metrics, traces for the new paths |
+| External-dependency failure | fallback, circuit breaking, fail-fast |
+| State-transition integrity | valid transitions, guards |
+
+Sweep depth follows the tier from phase 1. **Large/Complex:** every dimension resolves to a requirement or an explicit `N/A — <reason>`; no blanks. **Medium:** cover only the dimensions obviously present; collapse the rest into a single "remaining dimensions N/A for this scope" line. **Small:** skip the sweep. Record the outcome at the end of the Requirements section.
+
+The `N/A — <reason>` escape is mandatory where it applies — it prevents inventing requirements to fill a checklist. The sweep is bounded by the feature's boundary: it clarifies scope, it never expands it.
+
 For anything still unresolved at draft time, mark it inline:
 
 ```
