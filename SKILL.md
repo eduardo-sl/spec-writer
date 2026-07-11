@@ -1,7 +1,7 @@
 ---
 name: spec-writer
-description: Use this skill when the user asks to "write a spec", "create a spec", "spec out", "plan the implementation", "draft an implementation plan", "create a feature spec", "document how to implement", or otherwise needs a detailed implementation specification for a feature, integration, refactor, library, CLI, UI flow, data pipeline, or any other piece of work. Produces project-grounded specs with explicit goals and non-goals, decisions paired with rejected alternatives, testable acceptance criteria, and a verifiable definition of done. Works for any language, framework, or domain.
-version: 2.0.0
+description: Use this skill when the user asks to "write a spec", "create a spec", "spec out", "plan the implementation", "draft an implementation plan", "create a feature spec", "document how to implement", or otherwise needs a detailed implementation specification for a feature, integration, refactor, library, CLI, UI flow, data pipeline, or any other piece of work. Produces project-grounded specs with explicit goals and non-goals, decisions paired with rejected alternatives, testable acceptance criteria, and a verifiable definition of done. Auto-sizes spec depth to the scope of the work. Works for any language, framework, or domain.
+version: 2.1.0
 license: MIT
 ---
 
