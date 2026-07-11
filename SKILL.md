@@ -47,6 +47,8 @@ The single most common failure mode is generating a generic spec because the cod
 - Infrastructure manifests if the work touches them (`docker-compose.*`, `k8s/`, `terraform/`).
 - The directory containing the area being modified — at least three representative files so the spec can match local conventions.
 
+While reading, flag concerns in the code the feature touches — fragile coupling, tech debt, security gaps, performance traps, untested paths the feature will depend on. They go into the spec's "Risks and concerns" section (7), each with a mitigation.
+
 Then **detect the feature class** before drafting — it determines which sections of the template apply:
 
 | Class | Examples | Sections that usually apply | Sections often omitted |
@@ -230,21 +232,30 @@ A description at one consistent level of detail. Include only what's new or chan
 
 Place abstractions at the **consumer** layer, not the implementation layer. Dependencies must flow inward toward the domain.
 
-## 7. Dependencies (conditional — required when introducing any)
+## 7. Risks and concerns (conditional — required when investigation surfaced any)
+Concerns found in the existing code this feature touches:
+
+| Concern | Location | Impact | Mitigation |
+|---|---|---|---|
+| <fragile coupling / tech debt / security gap / performance trap / test gap> | `path/file.ext:42` | what breaks or degrades | how this spec — or a named follow-up — addresses it |
+
+Every row gets a mitigation. "None found" is a valid section body.
+
+## 8. Dependencies (conditional — required when introducing any)
 Exact install commands grouped by purpose (runtime / dev / tooling). Include version constraints where they matter. Otherwise: "No new dependencies required."
 
-## 8. Configuration (conditional — required for new env vars or config keys)
+## 9. Configuration (conditional — required for new env vars or config keys)
 Table: variable | config key | default | required | description.
 Each new optional capability has an `_ENABLED`-style toggle defaulting to off. When off, no infrastructure is initialized and no connections are opened.
 
-## 9. File structure (required)
+## 10. File structure (required)
 A tree showing only:
 - new files (one-line description)
 - modified files (`← Modified: <reason>`)
 
 Do not list files unaffected by this work.
 
-## 10. Implementation outline (required)
+## 11. Implementation outline (required)
 Pattern-critical code, not full implementations. For non-trivial points, show:
 - The interface or contract.
 - The concrete logic that is not obvious.
@@ -253,51 +264,51 @@ Pattern-critical code, not full implementations. For non-trivial points, show:
 
 Skip boilerplate that follows the project's established pattern; write `// follows the standard <pattern> pattern` and move on.
 
-## 11. Failure modes and degradation (conditional — required for any external dependency)
+## 12. Failure modes and degradation (conditional — required for any external dependency)
 For each external dependency:
 - Behavior at startup if unavailable.
 - Behavior at runtime if it fails.
 - Whether the user-facing surface degrades or fails loudly.
 - If the dependency is critical (failure = system cannot serve requests), state so and justify.
 
-## 12. Wiring / Bootstrap (conditional — backend / service code)
+## 13. Wiring / Bootstrap (conditional — backend / service code)
 Position in the existing startup sequence and the reason. Shutdown ordering and the reason. Reference the project's documented wiring sequence if one exists.
 
-## 13. Infrastructure (conditional — new external services or manifests)
+## 14. Infrastructure (conditional — new external services or manifests)
 Configuration must include healthchecks or readiness criteria, resource limits, restart policy, and secrets handling. State exactly which files are added or modified (compose, k8s, terraform).
 
-## 14. UX / Accessibility (conditional — user-facing UI changes)
+## 15. UX / Accessibility (conditional — user-facing UI changes)
 - Component placement, all states (loading / empty / error / success).
 - Keyboard, screen-reader, and contrast behavior.
 - Telemetry on user-visible interactions.
 
-## 15. Public API / SDK impact (conditional — libraries, SDKs, public APIs)
+## 16. Public API / SDK impact (conditional — libraries, SDKs, public APIs)
 - Backward compatibility, semver impact (MAJOR / MINOR / PATCH).
 - Deprecations and timelines.
 - Migration guide for callers.
 
-## 16. Data and migrations (conditional — schema or data changes)
+## 17. Data and migrations (conditional — schema or data changes)
 - Schema delta, migration script location, reversibility.
 - Backfill plan: idempotency, batch size, throttling.
 - Read/write compatibility window during the migration.
 
-## 17. Security and privacy (conditional — auth, PII, secrets, external input)
+## 18. Security and privacy (conditional — auth, PII, secrets, external input)
 - New attack surface introduced.
 - AuthN / AuthZ changes.
 - Data classification, retention, redaction.
 - Input validation boundary — where untrusted data becomes trusted.
 
-## 18. Observability (conditional — recommended for production code)
+## 19. Observability (conditional — recommended for production code)
 - Logs: events, levels, structured fields.
 - Metrics: names, units, labels.
 - Traces: spans of interest.
 - Alerts and ownership.
 
-## 19. Performance (conditional — when latency, throughput, or cost matters)
+## 20. Performance (conditional — when latency, throughput, or cost matters)
 - Targets: p50 / p95 / p99 latency, throughput, memory, cost.
 - Load characteristics and capacity assumptions.
 
-## 20. Testing (required)
+## 21. Testing (required)
 A scenario table with at least five rows. Cover: happy path, dependency unavailable, idempotency / repeat input, invalid input, cancellation / timeout, and any feature-specific concern.
 
 | Scenario | Setup | Expected behavior | Requirement |
@@ -306,20 +317,20 @@ A scenario table with at least five rows. Cover: happy path, dependency unavaila
 
 State unit / integration / contract test placement, what is mocked, what runs against real infrastructure, and the command to run them. Every command must come from the project's own manifests or CI config — name the source (e.g. "`make test`, from `Makefile`"). If the project has no test setup, say so and mark `[NEEDS CLARIFICATION: test runner and command?]` instead of inventing one. State any coverage target the project has.
 
-## 21. Rollout and rollback (conditional — staged or risky changes)
+## 22. Rollout and rollback (conditional — staged or risky changes)
 - Flag name and default.
 - Phased rollout plan (cohorts, % traffic).
 - Rollback procedure — concrete: a command, a flag flip, a redeploy.
 - Removal trigger for the flag and its target date.
 
-## 22. Tasks (required)
+## 23. Tasks (required)
 Numbered, dependency-ordered. Mark groups that can run in parallel. Each task back-references one or more requirement IDs. Order tasks so the P1 requirements complete first — the P1 slice should be demonstrable before P2/P3 work starts.
 
 - T1 [parallel-A] [R1] — ...
 - T2 [parallel-A] [R2] — ...
 - T3 [after T1, T2] [R3] — ...
 
-## 23. Definition of Done (required)
+## 24. Definition of Done (required)
 A checklist where every item is independently verifiable — a command passes, a file exists, an observable behavior is met. Group by layer (contracts, implementation, integration, tests, observability) when useful.
 
 - [ ] R1 verified by <test / command / observation>
